@@ -20,7 +20,7 @@ from pikeos import ArmPikeOS, ArmPikeOS42
 from arm.cortexm import Stm32, Sam, SmartFusion2, LM3S, M1AGL, Microbit, \
      NRF52840, NRF52832, \
      CortexM0, CortexM0P, CortexM1, CortexM3, CortexM4, CortexM4F, \
-     CortexM7F, CortexM7DF
+     CortexM7F, CortexM7DF, Stm32L0
 
 # Cortex-A/R runtimes
 from arm.cortexar import TMS570, Rpi2, Rpi2Mc, Zynq7000
@@ -69,6 +69,8 @@ def build_configs(target):
         t = Sam(target)
     elif target.startswith('smartfusion2'):
         t = SmartFusion2()
+    elif target.startswith('stm32l0'):
+        t = Stm32L0(target)
     elif target.startswith('stm32'):
         t = Stm32(target)
     elif target == 'feather_stm32f405':

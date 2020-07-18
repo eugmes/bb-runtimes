@@ -746,6 +746,66 @@ class CortexM0P(CortexM0):
                 '-mcpu=cortex-m0plus')
 
 
+class Stm32L0(CortexM0P):
+    """Generic handling of stm32l0 boards."""
+    @property
+    def name(self):
+        return self.board
+
+    @property
+    def loaders(self):
+        return ('ROM', 'RAM')
+
+    @property
+    def system_ads(self):
+        return {'zfp': 'system-xi-arm.ads',
+                'ravenscar-sfp': 'system-xi-armv6m-sfp.ads',
+                'ravenscar-full': 'system-xi-armv6m-full.ads'}
+
+    def __init__(self, board):
+        super(CortexM0P, self).__init__()
+
+        self.board = board
+        if self.board == 'stm32l0538disco':
+            self.sub_family = 'stm32l0x3'
+            self.mem_cfg = '5xx8'
+        else:
+            assert False, 'Unknown stm32l0 board: %s' % self.board
+
+        self.add_linker_script('arm/stm32l0/common-RAM.ld', loader='RAM')
+        self.add_linker_script('arm/stm32l0/common-ROM.ld', loader='ROM')
+
+        self.add_linker_script('arm/stm32l0/%s/memory-map.ld' % self.mem_cfg,
+                               loader=('RAM', 'ROM'))
+
+        # startup code
+        self.add_sources('crt0', [
+            'src/s-bbarat.ads',
+            'src/s-bbarat.adb',
+            'arm/stm32l0/s-stm32.ads',
+            'arm/stm32l0/s-stm32.adb',
+            'arm/stm32l0/s-bbpara.ads',
+            'arm/stm32l0/start-rom.S',
+            'arm/stm32l0/start-ram.S',
+            'arm/stm32l0/start-common.S',
+            'arm/stm32l0/setup_pll.adb',
+            'arm/stm32l0/setup_pll.ads',
+            'arm/stm32l0/%s/s-bbbopa.ads' % self.sub_family,
+            'arm/stm32l0/%s/s-bbmcpa.ads' % self.sub_family,
+            'arm/stm32l0/%s/s-bbmcpa.adb' % self.sub_family,
+            'arm/stm32l0/%s/svd/i-stm32.ads' % self.sub_family,
+            'arm/stm32l0/%s/svd/i-stm32-flash.ads' % self.sub_family,
+            'arm/stm32l0/%s/svd/i-stm32-pwr.ads' % self.sub_family,
+            'arm/stm32l0/%s/svd/i-stm32-rcc.ads' % self.sub_family])
+
+        # ravenscar support
+        self.add_sources('gnarl', [
+            'arm/stm32l0/%s/svd/handler.S' % self.sub_family,
+            'arm/stm32l0/%s/svd/a-intnam.ads' % self.sub_family,
+            'src/s-bcpcst__pendsv.adb',
+            'src/s-bbbosu__armv7m.adb'])
+
+
 class CortexM1(ArmV6MTarget):
     @property
     def name(self):
